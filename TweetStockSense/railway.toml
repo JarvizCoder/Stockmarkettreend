@@ -1,0 +1,20 @@
+[app]
+name = "tweetstocksense"
+
+[build]
+command = "pip install -r requirements.txt"
+
+[deploy]
+command = "python app.py"
+
+[env]
+SESSION_SECRET = "${SESSION_SECRET:-dev_secret_key_change_in_production}"
+
+[database]
+name = "tweetstocksense-db"
+engine = "postgresql"
+size = "free"
+
+[variables]
+DATABASE_URL = "${DATABASE_URL}"
+PORT = 8080

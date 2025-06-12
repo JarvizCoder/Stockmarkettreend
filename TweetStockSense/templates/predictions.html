@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Predictions - Stock Market Predictor{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-6 fw-bold mb-3">
+            <i class="fas fa-crystal-ball me-2"></i>Stock Predictions
+        </h1>
+        <p class="lead text-muted">AI-powered stock price predictions using sentiment analysis</p>
+    </div>
+</div>
+
+<!-- Stock Selection -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">Select Stock for Prediction</h6>
+                <div class="row">
+                    <div class="col-md-8">
+                        <input type="text" id="stock-input" class="form-control" 
+                               placeholder="Enter stock symbol (e.g., RELIANCE.NS)" 
+                               list="stock-suggestions">
+                        <datalist id="stock-suggestions">
+                            <option value="RELIANCE.NS">Reliance Industries</option>
+                            <option value="TCS.NS">Tata Consultancy Services</option>
+                            <option value="HDFCBANK.NS">HDFC Bank</option>
+                            <option value="INFY.NS">Infosys</option>
+                            <option value="HINDUNILVR.NS">Hindustan Unilever</option>
+                            <option value="ITC.NS">ITC Limited</option>
+                            <option value="SBIN.NS">State Bank of India</option>
+                            <option value="BHARTIARTL.NS">Bharti Airtel</option>
+                            <option value="KOTAKBANK.NS">Kotak Mahindra Bank</option>
+                            <option value="LT.NS">Larsen & Toubro</option>
+                        </datalist>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-primary w-100" onclick="generatePrediction()">
+                            <i class="fas fa-magic me-1"></i>Predict
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">Prediction Model</h6>
+                <p class="small text-muted mb-2">Our AI model considers:</p>
+                <ul class="small text-muted mb-0">
+                    <li>Historical price trends</li>
+                    <li>Twitter sentiment analysis</li>
+                    <li>Technical indicators</li>
+                    <li>Market volatility</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading State -->
+<div id="loading" class="text-center py-5 d-none">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3 text-muted">Analyzing stock data and generating prediction...</p>
+</div>
+
+<!-- Error State -->
+<div id="error-state" class="alert alert-danger d-none" role="alert">
+    <h4 class="alert-heading">Prediction Failed</h4>
+    <p id="error-message">Unable to generate prediction. Please try again.</p>
+    <button class="btn btn-outline-danger" onclick="generatePrediction()">
+        <i class="fas fa-refresh me-1"></i>Retry
+    </button>
+</div>
+
+<!-- Prediction Results -->
+<div id="prediction-results" class="row d-none">
+    <!-- Current vs Predicted -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-balance-scale me-2"></i>Price Comparison
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h6 class="text-muted">Current Price</h6>
+                        <h3 id="current-price-display" class="text-info">--</h3>
+                    </div>
+                    <div class="col-6">
+                        <h6 class="text-muted">Predicted Price</h6>
+                        <h3 id="predicted-price-display" class="text-warning">--</h3>
+                    </div>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <h6 class="text-muted">Expected Change</h6>
+                    <h4 id="price-change-display">--</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recommendation -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-thumbs-up me-2"></i>Recommendation
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <h2 id="recommendation-badge" class="badge mb-3">--</h2>
+                <div class="row">
+                    <div class="col-6">
+                        <h6 class="text-muted">Confidence</h6>
+                        <div class="progress mb-2">
+                            <div id="confidence-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <small id="confidence-text" class="text-muted">--</small>
+                    </div>
+                    <div class="col-6">
+                        <h6 class="text-muted">Sentiment Score</h6>
+                        <h4 id="sentiment-score-display">--</h4>
+                        <small id="sentiment-label-display" class="text-muted">--</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Technical Analysis -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Advanced Technical Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Moving Averages -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="text-primary mb-3">Moving Averages</h6>
+                    </div>
+                    <div class="col-md-2 col-sm-4 mb-3">
+                        <h6 class="text-muted">5-Day MA</h6>
+                        <p id="ma-5" class="mb-0 fw-bold">--</p>
+                    </div>
+                    <div class="col-md-2 col-sm-4 mb-3">
+                        <h6 class="text-muted">10-Day MA</h6>
+                        <p id="ma-10" class="mb-0 fw-bold">--</p>
+                    </div>
+                    <div class="col-md-2 col-sm-4 mb-3">
+                        <h6 class="text-muted">20-Day MA</h6>
+                        <p id="ma-20" class="mb-0 fw-bold">--</p>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <h6 class="text-muted">EMA 12</h6>
+                        <p id="ema-12" class="mb-0 fw-bold">--</p>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <h6 class="text-muted">EMA 26</h6>
+                        <p id="ema-26" class="mb-0 fw-bold">--</p>
+                    </div>
+                </div>
+                
+                <!-- Oscillators -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="text-primary mb-3">Oscillators & Momentum</h6>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <h6 class="text-muted">RSI (14)</h6>
+                        <div class="d-flex align-items-center">
+                            <p id="rsi" class="mb-0 fw-bold me-2">--</p>
+                            <span id="rsi-signal" class="badge">--</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <h6 class="text-muted">MACD</h6>
+                        <p id="macd" class="mb-0 fw-bold">--</p>
+                        <small id="macd-signal" class="text-muted">--</small>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <h6 class="text-muted">Volatility</h6>
+                        <p id="volatility" class="mb-0 fw-bold">--</p>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <h6 class="text-muted">Volume Ratio</h6>
+                        <p id="volume-ratio" class="mb-0 fw-bold">--</p>
+                    </div>
+                </div>
+                
+                <!-- Support & Resistance -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="text-primary mb-3">Support & Resistance</h6>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <h6 class="text-muted">Support Level</h6>
+                        <p id="support" class="mb-0 fw-bold text-success">--</p>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <h6 class="text-muted">Resistance Level</h6>
+                        <p id="resistance" class="mb-0 fw-bold text-danger">--</p>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <h6 class="text-muted">Bollinger Upper</h6>
+                        <p id="bollinger-upper" class="mb-0 fw-bold">--</p>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <h6 class="text-muted">Bollinger Lower</h6>
+                        <p id="bollinger-lower" class="mb-0 fw-bold">--</p>
+                    </div>
+                </div>
+                
+                <!-- Trend Analysis -->
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-primary mb-3">Trend Analysis</h6>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <h6 class="text-muted">Short Term (5-day)</h6>
+                        <p id="trend-short" class="mb-0 fw-bold">--</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <h6 class="text-muted">Medium Term (10-day)</h6>
+                        <p id="trend-medium" class="mb-0 fw-bold">--</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <h6 class="text-muted">Signal Strength</h6>
+                        <div id="signal-strength" class="d-flex align-items-center">
+                            <span id="buy-signals" class="badge bg-success me-2">-- Buy</span>
+                            <span id="sell-signals" class="badge bg-danger">-- Sell</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Disclaimer -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h6 class="alert-heading">
+                <i class="fas fa-exclamation-triangle me-2"></i>Disclaimer
+            </h6>
+            <p class="mb-0 small">
+                These predictions are generated using AI algorithms and should not be considered as financial advice. 
+                Stock market investments are subject to market risks. Please consult with a financial advisor before making investment decisions.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/predictions.js') }}"></script>
+{% endblock %}

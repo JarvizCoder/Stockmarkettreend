@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Stock Market Predictor{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-6 fw-bold mb-3">
+            <i class="fas fa-tachometer-alt me-2"></i>Market Dashboard
+        </h1>
+        <p class="lead text-muted">Real-time overview of Indian stock market with sentiment analysis</p>
+    </div>
+</div>
+
+<!-- Loading indicator -->
+<div id="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3 text-muted">Loading market data...</p>
+</div>
+
+<!-- Error state -->
+<div id="error-state" class="alert alert-danger d-none" role="alert">
+    <h4 class="alert-heading">Unable to Load Data</h4>
+    <p>We're experiencing issues connecting to market data services. Please check your internet connection or try again later.</p>
+    <button class="btn btn-outline-danger" onclick="loadDashboardData()">
+        <i class="fas fa-refresh me-1"></i>Retry
+    </button>
+</div>
+
+<!-- Market Overview Cards -->
+<div id="market-overview" class="row mb-4 d-none">
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="card-title text-muted">NIFTY 50</h6>
+                <h3 class="card-text" id="nifty-price">--</h3>
+                <small id="nifty-change" class="text-muted">--</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="card-title text-muted">SENSEX</h6>
+                <h3 class="card-text" id="sensex-price">--</h3>
+                <small id="sensex-change" class="text-muted">--</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Market Sentiment</h6>
+                <h3 class="card-text" id="sentiment-score">--</h3>
+                <small id="sentiment-label" class="text-muted">--</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Active Stocks</h6>
+                <h3 class="card-text" id="active-stocks">--</h3>
+                <small class="text-muted">Tracking</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Performing Stocks -->
+<div id="top-stocks-section" class="row d-none">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-star me-2"></i>Top Performing Stocks
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Name</th>
+                                <th>Price</th>
+                                <th>Change</th>
+                                <th>Change %</th>
+                                <th>Volume</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-stocks-table">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Market Chart -->
+<div id="chart-section" class="row mt-4 d-none">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Market Overview Chart
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="marketChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
